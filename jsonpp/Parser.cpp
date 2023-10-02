@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "Parser.h"
+#include "Error.h"
 
 namespace json
 {
@@ -32,12 +33,7 @@ namespace json
 
 		if (*_pos == '\0')
 		{
-			std::cout << "Expected closing bracket, received EOF instead in line "
-				<< _current_line
-				<< " at column "
-				<< _current_column
-				<< "." << std::endl;
-			return;
+			throw ParserError("Expected closing bracket, received EOF instead", _current_line, _current_column);
 		}
 
 		while (*_pos)
@@ -61,7 +57,7 @@ namespace json
 
 		if (*_pos == '\0')
 		{
-			std::cout << "Unexpected EOF found" << std::endl;
+			throw ParserError("Unexpected EOF found", _current_line, _current_column);
 			return;
 		}
 
@@ -71,11 +67,7 @@ namespace json
 			parse_object(node);
 			break;
 		default:
-			std::cout << "Unexpected token found at line "
-				<< _current_line
-				<< " in column "
-				<< _current_column
-				<< "." << std::endl;
+			throw ParserError("Unexpected token found", _current_line, _current_column);
 		}
 
 		skip_whitespace();
