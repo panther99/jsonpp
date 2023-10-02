@@ -1,0 +1,16 @@
+# Directories
+.vs/
+.vscode/
+bin/
+build/
+bin-int/
+x64/
+jsonpp/x64/
+vcpkg_installed/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.log
