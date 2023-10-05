@@ -42,6 +42,7 @@ namespace json
 		void parse_string(Node& node);
 		void parse_bool(Node& node);
 		void parse_null(Node& node);
+		void parse_number(Node& node);
 		void parse_node(Node& node);
 
 	public:

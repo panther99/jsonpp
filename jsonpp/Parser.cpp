@@ -212,6 +212,37 @@ namespace json
 		}
 	}
 
+	void Parser::parse_number(Node& node)
+	{
+		static const std::string lookup = "0123456789eE+-.";
+		const char* begin = _pos;
+
+		if (*begin == '\0')
+		{
+			throw ParserError("Unexpected EOF received, expected number", _current_line, _current_column);
+		}
+
+		while (lookup.find(*_pos) != std::string::npos)
+		{
+			_pos++;
+		}
+
+		double value = 0.0;
+		std::string temp(begin, _pos);
+
+		try
+		{
+			value = std::stod(temp);
+			_current_column += temp.size() + 1;
+		}
+		catch (const std::exception& e)
+		{
+			throw ParserError(fmt::format("Unable to parse '{}' to number", temp), _current_line, _current_column);
+		}
+
+		node = value;
+	}
+
 	void Parser::parse_node(Node& node)
 	{
 		skip_whitespace();
@@ -222,23 +253,30 @@ namespace json
 			return;
 		}
 
-		switch (*_pos)
+		if (isdigit(*_pos) || *_pos == '+' || *_pos == '-')
 		{
-		case '{':
-			parse_object(node);
-			break;
-		case '"':
-			parse_string(node);
-			break;
-		case 't':
-		case 'f':
-			parse_bool(node);
-			break;
-		case 'n':
-			parse_null(node);
-			break;
-		default:
-			throw ParserError(fmt::format("Unknown identifier '{}'", *_pos), _current_line, _current_column);
+			parse_number(node);
+		}
+		else
+		{
+			switch (*_pos)
+			{
+			case '{':
+				parse_object(node);
+				break;
+			case '"':
+				parse_string(node);
+				break;
+			case 't':
+			case 'f':
+				parse_bool(node);
+				break;
+			case 'n':
+				parse_null(node);
+				break;
+			default:
+				throw ParserError(fmt::format("Unknown identifier '{}'", *_pos), _current_line, _current_column);
+			}
 		}
 
 		skip_whitespace();
