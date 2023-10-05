@@ -10,6 +10,9 @@ add_executable("${PROJECT_NAME}"
 	jsonpp/Main.cpp
 )
 
+find_package(fmt CONFIG REQUIRED)
+target_link_libraries("${PROJECT_NAME}" PRIVATE fmt::fmt)
+
 target_include_directories("${PROJECT_NAME}" PRIVATE "jsonpp")
 
 set_property(TARGET "${PROJECT_NAME}"
