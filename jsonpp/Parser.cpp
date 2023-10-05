@@ -80,7 +80,7 @@ namespace json
 				result.push_back('\b');
 				break;
 			default:
-				throw ParserError(fmt::format("Unexpected '{}' escape character received", *copy), _current_line, _current_column);
+				throw ParserError(fmt::format("Unknown '{}' escape character received", *copy), _current_line, _current_column);
 			}
 		}
 
@@ -114,7 +114,7 @@ namespace json
 
 			if (*_pos != '"')
 			{
-				throw ParserError(fmt::format("Unexpected '{}', expected string for the object key", *_pos), _current_line, _current_column);
+				throw ParserError(fmt::format("Unknown identifier '{}', expected string for the object key", *_pos), _current_line, _current_column);
 			}
 
 			parse_string(key);
@@ -123,7 +123,7 @@ namespace json
 
 			if (*_pos != ':')
 			{
-				throw ParserError(fmt::format("Unexpected '{}', expected colon", *_pos), _current_line, _current_column);
+				throw ParserError(fmt::format("Unknown identifier '{}', expected colon", *_pos), _current_line, _current_column);
 			}
 			++_pos;
 
@@ -190,7 +190,26 @@ namespace json
 			return;
 		}
 
-		throw ParserError(fmt::format("Unexpected identifier '{}', expected 'true' or 'false'", result), _current_line, _current_column);
+		throw ParserError(fmt::format("Unknown identifier '{}', expected 'true' or 'false'", result), _current_line, _current_column);
+	}
+
+	void Parser::parse_null(Node& node)
+	{
+		const char* null_kw = "null";
+		
+		std::string result;
+
+		while (isalpha(*_pos) && isalpha(*null_kw) && *_pos == *null_kw)
+		{
+			_pos++;
+			result.push_back(*null_kw++);
+			continue;
+		}
+
+		if (result != "null")
+		{
+			throw ParserError(fmt::format("Unknown identifier '{}', expected 'null'", result), _current_line, _current_column);
+		}
 	}
 
 	void Parser::parse_node(Node& node)
@@ -215,8 +234,11 @@ namespace json
 		case 'f':
 			parse_bool(node);
 			break;
+		case 'n':
+			parse_null(node);
+			break;
 		default:
-			throw ParserError("Unexpected token received", _current_line, _current_column);
+			throw ParserError(fmt::format("Unknown identifier '{}'", *_pos), _current_line, _current_column);
 		}
 
 		skip_whitespace();

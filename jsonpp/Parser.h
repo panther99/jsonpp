@@ -41,6 +41,7 @@ namespace json
 		template<typename Node>
 		void parse_string(Node& node);
 		void parse_bool(Node& node);
+		void parse_null(Node& node);
 		void parse_node(Node& node);
 
 	public:
