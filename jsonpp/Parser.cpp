@@ -22,6 +22,71 @@ namespace json
 		}
 	}
 
+	template<typename Node>
+	void Parser::parse_string(Node& node)
+	{
+		const char* copy = _pos + 1;
+
+		if (*copy == '\0')
+		{
+			throw ParserError("Expected string, received EOF instead", _current_line, _current_column);
+		}
+
+		std::string result;
+
+		while (1)
+		{
+			++_current_column;
+
+			if (*copy == '"')
+			{
+				break;
+			}
+
+			if (*copy != '\\')
+			{
+				result.push_back(*copy++);
+				continue;
+			}
+
+			++copy;
+
+			switch (*copy)
+			{
+			case '/':
+				result.push_back('/');
+				break;
+			case '\\':
+				result.push_back('\\');
+				break;
+			case '"':
+				result.push_back('\"');
+				break;
+			case 'f':
+				result.push_back('\f');
+				break;
+			case 'n':
+				result.push_back('\n');
+				break;
+			case 'r':
+				result.push_back('\r');
+				break;
+			case 't':
+				result.push_back('\t');
+				break;
+			case 'b':
+				result.push_back('\b');
+				break;
+			default:
+				throw ParserError("Invalid escape character found", _current_line, _current_column);
+			}
+		}
+
+		node = result;
+		++copy;
+		_pos = copy;
+	}
+
 	void Parser::parse_object(Node& node)
 	{
 		++_pos;
@@ -42,6 +107,36 @@ namespace json
 			{
 				break;
 			}
+
+			if (*_pos != '"')
+			{
+				throw ParserError("Expected string as a key for the object not received", _current_line, _current_column);
+			}
+
+			parse_string(key);
+
+			skip_whitespace();
+
+			if (*_pos != ':')
+			{
+				throw ParserError("Missing colon", _current_line, _current_column);
+			}
+			++_pos;
+
+			skip_whitespace();
+
+			parse_node(value);
+
+			if (*_pos != ',' && *_pos != '}')
+			{
+				throw ParserError("Missing comma", _current_line, _current_column);
+			}
+			else if (*_pos == ',')
+			{
+				++_pos;
+			}
+
+			obj.emplace(key, value);
 		}
 
 		node = obj;
@@ -65,6 +160,9 @@ namespace json
 		{
 		case '{':
 			parse_object(node);
+			break;
+		case '"':
+			parse_string(node);
 			break;
 		default:
 			throw ParserError("Unexpected token found", _current_line, _current_column);

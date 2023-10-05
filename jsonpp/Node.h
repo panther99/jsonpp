@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <variant>
 
 namespace json
 {
@@ -14,12 +15,15 @@ namespace json
 		enum class StorageType
 		{
 			Null,
-			Object
+			Object,
+			String
 		};
 
-		union storage_t {
-			Object* object;
-		} _storage;
+		std::variant<
+			std::nullptr_t,
+			std::shared_ptr<Object>,
+			std::shared_ptr<std::string>
+		> _storage;
 		StorageType _storage_type;
 
 	public:
@@ -27,7 +31,12 @@ namespace json
 
 		Node(const Object& object) : _storage_type(StorageType::Object)
 		{
-			_storage.object = new Object(object);
+			_storage = std::make_shared<Object>(object);
+		}
+
+		Node(const std::string& str) : _storage_type(StorageType::String)
+		{
+			_storage = std::make_shared<std::string>(str);
 		}
 
 	};
