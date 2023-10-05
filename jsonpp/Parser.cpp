@@ -3,6 +3,7 @@
 #include <istream>
 #include <sstream>
 #include <cctype>
+#include <fmt/core.h>
 
 #include "Parser.h"
 #include "Error.h"
@@ -30,7 +31,7 @@ namespace json
 
 		if (*copy == '\0')
 		{
-			throw ParserError("Expected string, received EOF instead", _current_line, _current_column);
+			throw ParserError("Unexpected EOF received, expected string", _current_line, _current_column);
 		}
 
 		std::string result;
@@ -79,7 +80,7 @@ namespace json
 				result.push_back('\b');
 				break;
 			default:
-				throw ParserError("Invalid escape character found", _current_line, _current_column);
+				throw ParserError(fmt::format("Unexpected '{}' escape character received", *copy), _current_line, _current_column);
 			}
 		}
 
@@ -99,7 +100,7 @@ namespace json
 
 		if (*_pos == '\0')
 		{
-			throw ParserError("Expected closing bracket, received EOF instead", _current_line, _current_column);
+			throw ParserError("Unexpected EOF received, expected closing bracket", _current_line, _current_column);
 		}
 
 		while (*_pos)
@@ -113,7 +114,7 @@ namespace json
 
 			if (*_pos != '"')
 			{
-				throw ParserError("Expected string as a key for the object not received", _current_line, _current_column);
+				throw ParserError(fmt::format("Unexpected '{}', expected string for the object key", *_pos), _current_line, _current_column);
 			}
 
 			parse_string(key);
@@ -122,7 +123,7 @@ namespace json
 
 			if (*_pos != ':')
 			{
-				throw ParserError("Missing colon", _current_line, _current_column);
+				throw ParserError(fmt::format("Unexpected '{}', expected colon", *_pos), _current_line, _current_column);
 			}
 			++_pos;
 
@@ -132,7 +133,7 @@ namespace json
 
 			if (*_pos != ',' && *_pos != '}')
 			{
-				throw ParserError("Missing comma", _current_line, _current_column);
+				throw ParserError("Missing comma after the key-value declaration", _current_line, _current_column);
 			}
 			else if (*_pos == ',')
 			{
@@ -189,7 +190,7 @@ namespace json
 			return;
 		}
 
-		throw ParserError("Unexpected identifier, expected 'true' or 'false'", _current_line, _current_column);
+		throw ParserError(fmt::format("Unexpected identifier '{}', expected 'true' or 'false'", result), _current_line, _current_column);
 	}
 
 	void Parser::parse_node(Node& node)
@@ -198,7 +199,7 @@ namespace json
 
 		if (*_pos == '\0')
 		{
-			throw ParserError("Unexpected EOF found", _current_line, _current_column);
+			throw ParserError("Unexpected EOF received", _current_line, _current_column);
 			return;
 		}
 
@@ -215,7 +216,7 @@ namespace json
 			parse_bool(node);
 			break;
 		default:
-			throw ParserError("Unexpected token found", _current_line, _current_column);
+			throw ParserError("Unexpected token received", _current_line, _current_column);
 		}
 
 		skip_whitespace();
@@ -227,7 +228,7 @@ namespace json
 
 		if (*_pos != '\0')
 		{
-			throw ParserError("Unexpected token, expected EOF", _current_line, _current_column);
+			throw ParserError("Unexpected token received, expected EOF", _current_line, _current_column);
 		}
 	}
 }
