@@ -9,7 +9,7 @@ int main()
 
 	try
 	{
-		json::parse("{ \"name\"  : \"Nikola\" }\0", node);
+		json::parse("{ \"name\" : \"Nikola\", \"available\": true }\0", node);
 		json::parse("{", node); // will output error
 	}
 	catch (json::ParserError& e)

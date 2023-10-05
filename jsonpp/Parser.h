@@ -40,6 +40,7 @@ namespace json
 		void parse_object(Node& node);
 		template<typename Node>
 		void parse_string(Node& node);
+		void parse_bool(Node& node);
 		void parse_node(Node& node);
 
 	public:

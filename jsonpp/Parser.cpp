@@ -2,6 +2,7 @@
 #include <iostream>
 #include <istream>
 #include <sstream>
+#include <cctype>
 
 #include "Parser.h"
 #include "Error.h"
@@ -103,6 +104,8 @@ namespace json
 
 		while (*_pos)
 		{
+			skip_whitespace();
+
 			if (*_pos == '}')
 			{
 				break;
@@ -146,6 +149,49 @@ namespace json
 		}
 	}
 
+	void Parser::parse_bool(Node& node)
+	{
+		const char* true_kw = "true";
+		const char* false_kw = "false";
+
+		std::string result;
+
+		switch (*_pos)
+		{
+		case 'f':
+			while (isalpha(*_pos) && isalpha(*false_kw) && *_pos == *false_kw)
+			{
+				result.push_back(*false_kw++);
+				++_pos;
+				continue;
+			}
+			break;
+		case 't':
+			while (isalpha(*_pos) && isalpha(*true_kw) && *_pos == *true_kw)
+			{
+				result.push_back(*true_kw++);
+				++_pos;
+				continue;
+			}
+			break;
+		}
+
+		++_pos;
+
+		if (result == "true")
+		{
+			node = true;
+			return;
+		}
+		else if (result == "false")
+		{
+			node = false;
+			return;
+		}
+
+		throw ParserError("Unexpected identifier, expected 'true' or 'false'", _current_line, _current_column);
+	}
+
 	void Parser::parse_node(Node& node)
 	{
 		skip_whitespace();
@@ -164,6 +210,10 @@ namespace json
 		case '"':
 			parse_string(node);
 			break;
+		case 't':
+		case 'f':
+			parse_bool(node);
+			break;
 		default:
 			throw ParserError("Unexpected token found", _current_line, _current_column);
 		}
@@ -177,11 +227,7 @@ namespace json
 
 		if (*_pos != '\0')
 		{
-			std::cout << "Unexpected token found at line "
-				<< _current_line
-				<< " in column "
-				<< _current_column
-				<< "." << std::endl;
+			throw ParserError("Unexpected token, expected EOF", _current_line, _current_column);
 		}
 	}
 }

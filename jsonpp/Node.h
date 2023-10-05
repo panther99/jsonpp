@@ -16,13 +16,15 @@ namespace json
 		{
 			Null,
 			Object,
-			String
+			String,
+			Bool
 		};
 
 		std::variant<
 			std::nullptr_t,
 			std::shared_ptr<Object>,
-			std::shared_ptr<std::string>
+			std::shared_ptr<std::string>,
+			bool
 		> _storage;
 		StorageType _storage_type;
 
@@ -37,6 +39,11 @@ namespace json
 		Node(const std::string& str) : _storage_type(StorageType::String)
 		{
 			_storage = std::make_shared<std::string>(str);
+		}
+
+		Node(bool boolean) : _storage_type(StorageType::Bool)
+		{
+			_storage = boolean;
 		}
 
 	};
