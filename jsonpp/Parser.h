@@ -38,6 +38,7 @@ namespace json
 
 		void skip_whitespace();
 		void parse_object(Node& node);
+		void parse_array(Node& node);
 		template<typename Node>
 		void parse_string(Node& node);
 		void parse_bool(Node& node);

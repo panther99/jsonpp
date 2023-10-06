@@ -150,6 +150,47 @@ namespace json
 		}
 	}
 
+	void Parser::parse_array(Node& node)
+	{
+		++_pos;
+		Node::Array array;
+		Node element;
+		skip_whitespace();
+
+		if (*_pos == '\0')
+		{
+			throw ParserError("Unexpected EOF received", _current_line, _current_column);
+		}
+
+		while (*_pos && *_pos != ']')
+		{
+			parse_node(element);
+
+			if (*_pos != ',' && *_pos != ']')
+			{
+				throw ParserError(fmt::format("Unexpected '{}', expected comma", *_pos), _current_line, _current_column);
+			}
+			else if (*_pos == ',')
+			{
+				++_pos;
+				skip_whitespace();
+
+				if (*_pos && *_pos == ']')
+				{
+					throw ParserError("Extraneous comma received", _current_line, _current_column);
+				}
+			}
+
+			array.push_back(element);
+		}
+
+		node = array;
+		if (*_pos == ']')
+		{
+			++_pos;
+		}
+	}
+
 	void Parser::parse_bool(Node& node)
 	{
 		const char* true_kw = "true";
@@ -176,8 +217,6 @@ namespace json
 			}
 			break;
 		}
-
-		++_pos;
 
 		if (result == "true")
 		{
@@ -263,6 +302,9 @@ namespace json
 			{
 			case '{':
 				parse_object(node);
+				break;
+			case '[':
+				parse_array(node);
 				break;
 			case '"':
 				parse_string(node);
