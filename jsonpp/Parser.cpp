@@ -24,6 +24,21 @@ namespace json
 		}
 	}
 
+	void Parser::skip_comment()
+	{
+		while (*_pos != Whitespace::LineFeed)
+		{
+			if (*_pos == '\0')
+			{
+				throw ParserError("Unexpected EOF received while reading a comment", _current_line, _current_column);
+			}
+			else
+			{
+				++_pos;
+			}
+		}
+	}
+
 	template<typename Node>
 	void Parser::parse_string(Node& node)
 	{
@@ -290,6 +305,12 @@ namespace json
 		{
 			throw ParserError("Unexpected EOF received", _current_line, _current_column);
 			return;
+		}
+
+		if (*_pos == '/' && *(_pos + 1) == '/')
+		{
+			skip_comment();
+			skip_whitespace();
 		}
 
 		if (isdigit(*_pos) || *_pos == '+' || *_pos == '-')

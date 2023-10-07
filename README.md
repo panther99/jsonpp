@@ -30,7 +30,8 @@ After that you can just execute `build.sh` and executable will be built in `buil
 
 The code is inspired by the [Rapptz's jsonpp](https://github.com/Rapptz/jsonpp) with certain modifications; I avoided using templates
 (since I'm still not well versed with them) and deletion mechanism has been replaced with the usage
-of shared pointers for objects, arrays and strings. 
+of shared pointers for objects, arrays and strings. Also, this one supports single-line comments before
+the root node ends.
 
 ## License
 

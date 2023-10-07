@@ -37,6 +37,7 @@ namespace json
 		const char* _pos;
 
 		void skip_whitespace();
+		void skip_comment();
 		void parse_object(Node& node);
 		void parse_array(Node& node);
 		template<typename Node>
